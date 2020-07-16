@@ -221,7 +221,7 @@ Xét ví dụ: Nhập text trên một input search component, phía dưới hi�
 
 #### Hai giải pháp:
 
-- Chỉ update danh sách kết quả khi uses ngừng stop -> Không thấy danh sách được update với text tương ứng.
+- Chỉ update danh sách kết quả khi uses ngừng gõ-> Không thấy danh sách được update với text tương ứng.
 - Thay vì update liên tục danh sách tương ứng text vừa gõ, chúng ta update theo khoảng thời gian cố định.
 
 => 2 giải pháp này làm deplay quá trình thay đổi state, chứ về bản chất hoạt động render bên dưới không thay đổi.
@@ -233,13 +233,13 @@ Ví dụ có 3 nhánh a, b, c. Đang thực hiện trên a, nhưng xét thấy n
 
 ### Intentional Loading Sequences:
 
-Để render một component A cần data hay code từ server trả về. Quá trình render vẫn diễn ra nhưng không cập nhật DOM thật do quá đó pending quá trình hiển thị trên UI, trong khi lúc thực thi work khác (ví dụ: Loading component). Sau khi xét thấy “state cần có” đã được trả về, lập tức tiếp tục render ra UI.
+Để render một component A cần data hay code từ server trả về. Quá trình render vẫn diễn ra nhưng không cập nhật DOM thật do đó tạm dừng work (component A) đang được render, trong lúc đó chuyển sang thực thi work khác (ví dụ: render Loading component). Sau khi xét thấy “state cần có” đã được trả về, lập tức tiếp tục render A.
 
 ### Tóm tắt:
 
 Chia làm 2 loại udate trong react theo chức năng mà concurrent mode hỗ trợ:
-CPU-bound updates: thay đổi trên dom, internal data. Concurrent mode phân biệt ưu tiên update và có thể ngắt rendering đang diễn ra nếu như update vừa đến thuộc dạng ưu tiên cao.
-IO-bound updates: cần external data. React chỉ quan tâm view, do đó với môt data đang có, nó bắt render, không quan tâm data đã có hay chưa.quá trình render react phát hiện chưa “đủ” data nên nó chuyển sang render 1 snipper (gọi là component loading hay loading states).
+CPU-bound updates: Thay đổi trên dom, internal data. Concurrent mode phân biệt ưu tiên update và có thể ngắt rendering đang diễn ra nếu như update vừa đến thuộc loại ưu tiên cao.
+IO-bound updates: Cần external data. React chỉ quan tâm view, do đó với một data đang có, nó bắt đầu render, không quan tâm data đã có hay chưa. Quá trình render react phát hiện chưa “đủ” data hay code nên nó chuyển sang render 1 snipper (gọi là component loading hay loading states).
 
 ## Suspense api cho fetch data từ external
 
