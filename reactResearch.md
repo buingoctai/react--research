@@ -241,7 +241,26 @@ Chia làm 2 loại udate trong react theo chức năng mà concurrent mode hỗ 
 CPU-bound updates: Thay đổi trên dom, internal data. Concurrent mode phân biệt ưu tiên update và có thể ngắt rendering đang diễn ra nếu như update vừa đến thuộc loại ưu tiên cao.
 IO-bound updates: Cần external data. React chỉ quan tâm view, do đó với một data đang có, nó bắt đầu render, không quan tâm data đã có hay chưa. Quá trình render react phát hiện chưa “đủ” data hay code nên nó chuyển sang render 1 snipper (gọi là component loading hay loading states).
 
-## Suspense api cho fetch data từ external
+## Kích hoạt cho phép sử dụng concurrent mode
+
+Đầu tiên cài đặt package:
+npm install react@experimental react-dom@experimental
+
+Concurrent mode liên quan đến thay đổi cách react làm việc bên dưới do đó không thể apply nó cho subtree. Do đó khi dùng Concurrent mode là apply toàn bộ đến App
+Thay thế ReactDOM.render(<App />, rootNode) bởi:
+ReactDOM.createRoot(rootNode).render(< App / >): Cho phép apply tất cả các feature gọi Concurrent Mode
+
+##### Hoặc
+
+ReactDOM.createBlockingRoot(rootNode).render(< App / >): cho phép apply một nhóm feature gọi là Blocking Mode
+
+Bảng chi tiết features ở mỗi cách config
+![phase render](images/compareConfig.png)
+Chú ý: Legacy Mode chính là ReactDOM.render(< App / >, rootNode)
+
+## Suspense Apis
+
+### Suspense component cho fetch data từ external
 
 Suspense: Tạm dừng quá trình render cho update A, chạy render cho update B, đợi A đủ “data hay code” bắt đầu render A trở lại.
 
@@ -250,11 +269,44 @@ Xét ví dụ data fetching: Cần external data từ server
 
 Cách xử lý truyền thống: render B -> fetch data bất đồng bộ -> data về -> update state -> render B.
 
-Với Suspense: fetch data bất đồng bộ -> render B-> loading states (render A)-> data về -> tiếp tục render B
+Với Suspense: fetch data bất đồng bộ -> render B-> loading states (render A hay gọi là fallback)-> data về -> tiếp tục render B
 
-## ErrorBoundary api cho xử lý lỗi: Catch lỗi ở cả rendering process và data fetching process
+### SuspenseList component: chứa nhiều Suspense component
 
-## Ngoài ra còn có SuspenseList giúp control được thứ tự (Chưa release)
+Mỗi component con trong nó cần fetch data nhưng thứ tự data trả về không dự đoán được.
+SuspenseList có những prop giúp kiểm soát thứ tự render những component con.
+revealOrder: có 3 giá trị
+
+- forwards: thứ tự hiển thị theo giống thứ tự được khai báo
+- backwards: thứ tự hiển thị ngược thứ tự được khai báo
+- together: cùng nhau hiển thị khi tất cả đã sẵn sàng.
+  tail :
+  Mặc định hiển thị tất tất cả fallback trong danh sách
+- collapsed: Chỉ hiển thị fallback kế tiếp trong danh sách
+- hidden: giấu tất cả fallback
+
+### Transtions: Kết hợp useTransistion hook
+
+Xét ví dụ: một page chứa một button gọi là Next và phía dưới hiển thị thông tin học sinh gọi là compoent A.
+Mỗi lần click vào Next button, sử dụng suspense, trong quá trình đợi fetch data học sinh khác được hoàn thành, sẽ hiển thị 1 loading component gọi là component B.
+Mỗi lần cick như vậy ta thấy thông tin học sinh trước đó bị mất ngay lập tức, thay vào đó là hiển thị component B. Ta muốn control việc hiển thị loading và có thể bỏ qua nó, để giữ hiển thị thông tin học sinh hiện tại.
+
+const [startTransition, isPending] = useTransition({
+timeoutMs: 3000
+});
+
+giá trị timeoutMs:3000 muốn nói rằng nếu thời gian cần chờ để chuyển sang thông tin học sinh mới lớn hơn 3s thì hiển thị loading component còn nhỏ hơn 3s thì ta cứ keep hiển thị hiện tại.
+
+Code minh họa: ở lại thông tin hs hiện tại và hiển thị text loading, sau 2s nếu data vẫn chưa về thì hiển thị Snipper
+
+### Deferring a Value: Kết hợp useDeferredValue hook
+
+Xét ví dụ: text input component và MyShowList component
+
+![useDeffered](images/useDeffered.png)
+
+Mong muốn sau khi nhập text thì list kết quả có ngay để cùng hiển thị với text. Hiện tại ta không kiểm soát được khoảng time chênh lệch khi nhập text và hiển thị list tương ứng.
+Đánh đổi tính consistent trong hiển thị bằng cách cho list tạm dừng trong 2s trước khi nó cập nhật.
 
 ## Lợi ích của Concurrent mode apis:
 
@@ -286,8 +338,6 @@ Hướng đến chia thành data(logic layer) và UI(presentational layer).
   => dễ tái sử dụng component, dễ mở rộng app, chia nhỏ mối quan tâm.
 
 ## Quản lý sự thay đổi state
-
-Quản lý sự thay đổi state
 
 - shouldUpdateComponent() lifecycle hoặc react.pureComponent (class component)
 - memo: higher order component(react v.16.6) (function component)
