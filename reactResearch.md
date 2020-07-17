@@ -221,7 +221,7 @@ Xét ví dụ: Nhập text trên một input search component, phía dưới hi�
 
 #### Hai giải pháp:
 
-- Chỉ update danh sách kết quả khi uses ngừng gõ-> Không thấy danh sách được update với text tương ứng.
+- Chỉ update danh sách kết quả khi user ngừng gõ-> Không thấy danh sách được update với text tương ứng.
 - Thay vì update liên tục danh sách tương ứng text vừa gõ, chúng ta update theo khoảng thời gian cố định.
 
 => 2 giải pháp này làm deplay quá trình thay đổi state, chứ về bản chất hoạt động render bên dưới không thay đổi.
