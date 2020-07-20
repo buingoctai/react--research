@@ -324,6 +324,50 @@ React full control đối với event handlers (onClick) và lifecycle methodanh
 
 Ngoại trừ call ajax hay setTimeout handler là do không biết khi nào quá trình kết thúc.
 
+### Xét các ví dụ
+
+#### Ví dụ 1
+
+![batching-ex1](images/batching-ex1.png)
+
+#### Hành động: Thực hiện click trên button của child, setState được gọi, sau đó parent gọi setSate tiếp.
+
+Giả sử react rerender ngay lập tức mới lần setState, quá trình đó được mô tả như sau:
+
+Child (onClick):
+
+- setState
+- rerender child // không mong muốn
+  Parent (onClick):
+- setState
+- rerender parent
+- rerender child
+
+#### Giải pháp:React batch tấst cả update trong event handler
+
+Child (onClick)
+
+- setState
+  Parent (onClick)
+- setState
+- Processing state updates
+- re-render Parent
+- re-render Chil
+
+Ở lần call setState đầu tiên, sẽ không gây ra rerender ngay lập tức, nó đợi sau khi tất cả event đã được thực thi sau đó trigger 1 rerender cho tất cả các update đã được batch.
+
+#### Ví dụ 2
+
+![batching-ex2](images/batching-ex2.png)
+
+#### Hành động: trigger click event, react chỉ run setCount là lần gọi hàm increment thứ 3.
+
+#### Để khắc phục: Đưa một hàm gọi là updater trong setCount
+
+![batching-ex3](images/batching-ex3.png)
+
+React sẽ đưa những hàm updater vào queue và sau đó thực thi chúng tuần tự. Kết quả cuối cùng count được set đến 3.
+
 # Cải thiện react app performance
 
 ## Tổ chức component
