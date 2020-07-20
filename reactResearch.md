@@ -315,12 +315,12 @@ Mong muốn sau khi nhập text thì list kết quả có ngay để cùng hiể
 
 ## React Batches state update: call setState liên tục
 
-Khi call setState(), nghĩa là có update diễn ra, react không thực hiện update state ngay lập tức mà push update này queue đợi
-React batch nhiều yêu cầu update state để make rerender hiêu quả.
+Khi call setState(), nghĩa là có update diễn ra, react không thực hiện update state ngay lập tức mà push update này vào queue đợi.
+React batch nhiều yêu cầu update state để thực hiện rerender hiệu quả.
 
 ### Lý do:
 
-React full control đối với event handlers (onClick) và lifecycle methodanh sách nên biết được hành vi change liên tục này là an toàn và đợi event handling này kết thúc rồi mới rerender.
+React full control đối với event handlers (onClick) và lifecycle methods nên biết được hành vi change liên tục này là an toàn và đợi event handling này kết thúc rồi mới rerender.
 
 Ngoại trừ call ajax hay setTimeout handler là do không biết khi nào quá trình kết thúc.
 
@@ -343,7 +343,7 @@ Child (onClick):
 - rerender parent
 - rerender child
 
-#### Giải pháp:React batch tấst cả update trong event handler
+#### Giải pháp: React batch tất cả update trong event handler.
 
 Child (onClick)
 
@@ -354,15 +354,15 @@ Child (onClick)
 - re-render Parent
 - re-render Chil
 
-Ở lần call setState đầu tiên, sẽ không gây ra rerender ngay lập tức, nó đợi sau khi tất cả event đã được thực thi sau đó trigger 1 rerender cho tất cả các update đã được batch.
+Ở lần call setState đầu tiên, sẽ không gây ra rerender ngay lập tức, nó đợi sau khi tất cả event đã được thực thi sau đó trigger một rerender cho tất cả các update đã được batch.
 
 #### Ví dụ 2
 
 ![batching-ex2](images/batching-ex2.png)
 
-#### Hành động: trigger click event, react chỉ run setCount là lần gọi hàm increment thứ 3.
+#### Hành động: Trigger click event, react chỉ run setCount là lần gọi hàm increment thứ 3.
 
-#### Để khắc phục: Đưa một hàm gọi là updater trong setCount
+#### Để khắc phục: Đưa một hàm gọi là updater trong setCount.
 
 ![batching-ex3](images/batching-ex3.png)
 
